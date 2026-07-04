@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require("bcrypt");
 const {generateAccessToken, generateRefreshToken} = require('../utils/generateTokens');
+const jwt = require('jsonwebtoken');
 
 
 // -------------------- Google Login --------------------------//
@@ -25,25 +26,8 @@ exports.googleLogin = async (req,res) =>{
         user.refreshToken = hashedJWTRefreshToken;
         await user.save();
 
-        res.cookie('jwtRefreshToken',jwtRefreshToken,
-
-            {
-                httpOnly : true,
-                secure : false,
-                sameSite : "lax",
-                maxAge : 1*60*1000
-            }
-        )
-
-        res.cookie('jwtAccessToken',jwtAccessToken,
-
-            {
-                httpOnly : true,
-                secure : false,
-                sameSite : "lax",
-                maxAge : 30*1000
-            }
-        )
+        res.cookie('jwtRefreshToken',jwtRefreshToken)
+        res.cookie('jwtAccessToken',jwtAccessToken)
 
         res.redirect(`http://localhost:5173/dashboard`);
 
@@ -60,11 +44,22 @@ exports.googleLogin = async (req,res) =>{
 
 exports.refreshAccessToken = async (req,res) => {
 
-    console.log("Refresh Access token called")
+    
 
     try{
 
         const refreshToken = req.cookies.jwtRefreshToken;
+
+        if(!refreshToken){
+
+            return res.status(401).json({
+
+                success:false,
+                message:"Refresh Token Missing"
+
+            });
+
+        }
         
         const decoded = await jwt.verify(
             refreshToken,
@@ -90,24 +85,17 @@ exports.refreshAccessToken = async (req,res) => {
 
         const newAccessToken = generateAccessToken(user);
 
-        res.cookie("jwtAccessToken", newAccessToken, {
-
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
-            maxAge:  30 * 1000
-
-        });
+        res.cookie("jwtAccessToken", newAccessToken);
 
         return res.status(200).json({
             message : "Access Token renewed"
-            
+
         })
 
 
 
     }catch(err){
-        return res.status(401).json({
+        return res.status(500).json({
             message : err.message
         })
     }
@@ -129,7 +117,7 @@ exports.userLogout = async (req,res)=>{
         
     }catch(err){
 
-        return res.status(401).json({
+        return res.status(500).json({
             message : err.message
         })
     }
@@ -141,7 +129,9 @@ exports.getUser = async (req, res) => {
 
     
 
-    return res.status(200).json({
+    try{
+
+        return res.status(200).json({
 
         success: true,
 
@@ -158,6 +148,14 @@ exports.getUser = async (req, res) => {
         }
 
     });
+
+    }catch(err){
+
+        return res.status(500).json({
+            message : err.message,
+            success : false
+        })
+    }
 
 }
 

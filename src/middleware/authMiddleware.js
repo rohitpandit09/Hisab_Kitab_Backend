@@ -7,11 +7,13 @@ exports.authMiddleware = async (req, res, next) => {
 
         const accessToken = req.cookies.jwtAccessToken;
 
+
         if (!accessToken) {
 
             return res.status(401).json({
                 success:false,
-                code:"TOKEN_MISSING"
+                code:"TOKEN_MISSING",
+                message:"Access Token Missing",
             });
 
         }
@@ -31,7 +33,6 @@ exports.authMiddleware = async (req, res, next) => {
             return res.status(404).json({
 
                 success: false,
-
                 message: "User not found"
 
             });
@@ -51,7 +52,6 @@ exports.authMiddleware = async (req, res, next) => {
             return res.status(401).json({
 
                 success:false,
-
                 code:"TOKEN_EXPIRED"
 
             });
@@ -61,7 +61,6 @@ exports.authMiddleware = async (req, res, next) => {
         return res.status(401).json({
 
             success:false,
-
             code:"INVALID_TOKEN"
 
         });
