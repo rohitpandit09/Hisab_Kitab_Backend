@@ -27,7 +27,7 @@ exports.generateAccessToken = (user)=>{
         process.env.JWT_ACCESS_TOKEN,
 
         {
-            expiresIn : "30s"
+            expiresIn : "30m"
         }
     )
     
