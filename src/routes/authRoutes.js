@@ -55,7 +55,7 @@ router.get(
 
 
 router.post("/refresh-token",refreshAccessToken);
-router.post('/logout',userLogout);
+router.post('/logout',authMiddleware,userLogout);
 router.get('/me',authMiddleware,getUser);
 router.patch("/update-profile",authMiddleware,updateProfile);
 

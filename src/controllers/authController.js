@@ -21,13 +21,18 @@ exports.googleLogin = async (req,res) =>{
         const jwtRefreshToken = generateRefreshToken(user);
         const jwtAccessToken = generateAccessToken(user);
 
-        const hashedJWTRefreshToken = await bcrypt.hash(jwtRefreshToken,10);
+        const hashedJWTRefreshToken = await bcrypt.hash(jwtRefreshToken,20);
 
         user.refreshToken = hashedJWTRefreshToken;
+        user.gmailConnected = true;
         await user.save();
+
+        console.log(user);
 
         res.cookie('jwtRefreshToken',jwtRefreshToken)
         res.cookie('jwtAccessToken',jwtAccessToken)
+
+        
 
         res.redirect(`http://localhost:5173/dashboard`);
 
@@ -43,8 +48,6 @@ exports.googleLogin = async (req,res) =>{
 // --------------------- Refreshing the access Token using refresh token -----------------------------//
 
 exports.refreshAccessToken = async (req,res) => {
-
-    
 
     try{
 
@@ -109,10 +112,19 @@ exports.userLogout = async (req,res)=>{
     try{
 
         const user = req.user;
+
         res.clearCookie("jwtRefreshToken");
         res.clearCookie("jwtAccessToken");
+
         user.refreshToken = null;
-        await user.save();
+    
+        req.user.gmailConnected = false;
+        await req.user.save();
+
+        res.status(200).json({
+            message : "Successfully logged out",
+            success : true
+        })
         
         
     }catch(err){

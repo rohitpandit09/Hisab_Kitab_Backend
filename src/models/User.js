@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema({
 
     gmailConnected: {
         type: Boolean,
-        default: true
+        default: false
     }
 
 }, {
