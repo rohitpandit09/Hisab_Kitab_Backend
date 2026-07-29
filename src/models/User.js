@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema({
         default: null
     },
 
+    gmailAccessToken : {
+        type : String,
+        default : null
+    },
+
     gmailRefreshToken: {
         type: String,
         default: null

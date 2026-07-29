@@ -7,6 +7,9 @@ const ratelimiter = require('express-rate-limit');
 const connectDB = require('./src/config/db');
 const passport = require("./src/config/passport");
 const session = require("express-session");
+const dns = require('dns');
+
+dns.setServers(['8.8.8.8','8.8.4.4'])
 
 
 // rate limiter 
@@ -35,6 +38,7 @@ connectDB();
 // Importing Routes
 
 const authRoutes = require('./src/routes/authRoutes');
+const gmailRoutes = require("./src/routes/gmailRoutes")
 
 
 // Using all installed packages 
@@ -53,6 +57,7 @@ app.use(cookieParser());
 // Using app.use
 
 app.use('/api/auth',authRoutes);
+app.use("/api/gmail",gmailRoutes);
 
 
 // Running the server

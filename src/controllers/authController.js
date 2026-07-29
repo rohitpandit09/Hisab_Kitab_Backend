@@ -27,8 +27,6 @@ exports.googleLogin = async (req,res) =>{
         user.gmailConnected = true;
         await user.save();
 
-        console.log(user);
-
         res.cookie('jwtRefreshToken',jwtRefreshToken)
         res.cookie('jwtAccessToken',jwtAccessToken)
 
@@ -119,6 +117,7 @@ exports.userLogout = async (req,res)=>{
         user.refreshToken = null;
     
         req.user.gmailConnected = false;
+        req.user.gmailAccessToken = null;
         await req.user.save();
 
         res.status(200).json({
@@ -181,7 +180,11 @@ exports.updateProfile = async (req, res) => {
 
         const user = req.user;
 
-        user.userName = name;
+        if(name){
+            
+            user.userName = name;
+        }
+
         user.mobile = phone;
         user.occupation = occupation;
 

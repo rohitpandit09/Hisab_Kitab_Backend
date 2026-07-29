@@ -31,13 +31,15 @@ passport.use(
                             email : profile.emails[0].value,
                             userName : profile.displayName,
                             gmailRefreshToken : googleRefreshToken,
-                            profilePicture : profile.photos[0]?.value || ""
+                            profilePicture : profile.photos[0]?.value || "",
+                            gmailAccessToken : googleAccessToken
                         })
 
                 }
                 else{
 
                     existingUser.gmailRefreshToken = googleRefreshToken;
+                    existingUser.gmailAccessToken = googleAccessToken;
                     await existingUser.save();
                     user = existingUser
                     
