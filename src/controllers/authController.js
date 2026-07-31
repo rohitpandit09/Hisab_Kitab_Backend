@@ -148,7 +148,7 @@ exports.googleLogin = async (req, res) => {
     try {
         const user = req.user;
 
-        const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/+$/, "");
+        const clientUrl = process.env.CLIENT_URL.replace(/\/+$/, "");
 
         if (!user) {
             return res.redirect(`${clientUrl}/?error=auth_failed`);

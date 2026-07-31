@@ -28,7 +28,7 @@ const authLimiter = ratelimiter({
 
 const isProduction = process.env.NODE_ENV === "production";
 
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+const CLIENT_URL = process.env.CLIENT_URL;
 const allowedOrigins = CLIENT_URL.split(",").map((u) => u.trim().replace(/\/$/, ""));
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));

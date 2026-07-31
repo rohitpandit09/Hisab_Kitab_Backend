@@ -27,7 +27,7 @@ router.get(
     passport.authenticate(
         "google",
         {
-            failureRedirect: `${(process.env.CLIENT_URL || "http://localhost:5173").replace(/\/+$/, "")}/?error=google_auth_failed`,
+            failureRedirect: `${process.env.CLIENT_URL.replace(/\/+$/, "")}/?error=google_auth_failed`,
             session: false
         }
     ),
