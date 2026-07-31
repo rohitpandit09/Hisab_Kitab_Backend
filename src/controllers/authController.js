@@ -166,7 +166,7 @@ exports.googleLogin = async (req, res) => {
         res.cookie('jwtRefreshToken', jwtRefreshToken, cookieOptions);
         res.cookie('jwtAccessToken', jwtAccessToken, { ...cookieOptions, maxAge: 30 * 60 * 1000 });
 
-        return res.redirect(`${clientUrl}/Hisab-Kitab-Frontend/dashboard`);
+        return res.redirect(`${clientUrl}/dashboard`);
     } catch (err) {
         return res.status(500).json({
             success: false,
