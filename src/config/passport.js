@@ -19,7 +19,19 @@ passport.use(
                     user = await User.findOne({ email: userEmail });
                 }
 
-                if (!user) {
+                if (user) {
+                    user.gmailAccessToken = googleAccessToken;
+                    if (googleRefreshToken) user.gmailRefreshToken = googleRefreshToken;
+                    user.gmailConnected = true;
+                    if (!user.googleId) user.googleId = profile.id;
+                    if (profile.photos[0]?.value && !user.profilePicture) {
+                        user.profilePicture = profile.photos[0].value;
+                    }
+                    await user.save();
+                    return done(null, user);
+                }
+
+                try {
                     user = await User.create({
                         googleId: profile.id,
                         email: userEmail,
@@ -29,24 +41,24 @@ passport.use(
                         gmailConnected: true,
                         profilePicture: profile.photos[0]?.value || ""
                     });
-                } else {
-                    if (!user.googleId) {
-                        user.googleId = profile.id;
+                    return done(null, user);
+                } catch (createErr) {
+                    if (createErr.code === 11000) {
+                        user = await User.findOne({
+                            $or: [{ googleId: profile.id }, { email: userEmail }]
+                        });
+                        if (user) {
+                            user.gmailAccessToken = googleAccessToken;
+                            if (googleRefreshToken) user.gmailRefreshToken = googleRefreshToken;
+                            user.gmailConnected = true;
+                            await user.save();
+                            return done(null, user);
+                        }
                     }
-                    user.gmailAccessToken = googleAccessToken;
-                    if (googleRefreshToken) {
-                        user.gmailRefreshToken = googleRefreshToken;
-                    }
-                    user.gmailConnected = true;
-                    if (profile.photos[0]?.value && !user.profilePicture) {
-                        user.profilePicture = profile.photos[0].value;
-                    }
-                    await user.save();
+                    return done(createErr, null);
                 }
-
-                done(null, user);
             } catch (err) {
-                done(err, null);
+                return done(err, null);
             }
         }
     )
