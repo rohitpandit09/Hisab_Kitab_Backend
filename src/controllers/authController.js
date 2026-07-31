@@ -147,7 +147,7 @@ exports.googleLogin = async (req, res) => {
         const user = req.user;
 
         if (!user) {
-            return res.redirect(`${process.env.CLIENT_URL || "http://localhost:5173"}/?error=auth_failed`);
+            return res.redirect(`https://rohitpandit09.github.io?error=auth_failed`);
         }
 
         const jwtRefreshToken = generateRefreshToken(user);
@@ -163,7 +163,7 @@ exports.googleLogin = async (req, res) => {
         res.cookie('jwtRefreshToken', jwtRefreshToken, cookieOptions);
         res.cookie('jwtAccessToken', jwtAccessToken, { ...cookieOptions, maxAge: 30 * 60 * 1000 });
 
-        res.redirect(`${process.env.CLIENT_URL || "http://localhost:5173"}/dashboard`);
+        res.redirect(`https://rohitpandit09.github.io/dashboard`);
     } catch (err) {
         return res.status(500).json({
             success: false,
