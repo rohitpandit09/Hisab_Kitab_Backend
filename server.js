@@ -21,20 +21,23 @@ const limiter = ratelimiter({
 
 const authLimiter = ratelimiter({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 20,
     standardHeaders: true,
     legacyHeaders: false
 });
 
-const allowedOrigins = ("https://rohitpandit09.github.io").split(",");
+const isProduction = process.env.NODE_ENV === "production";
 
-app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+const allowedOrigins = CLIENT_URL.split(",").map((u) => u.trim().replace(/\/$/, ""));
+
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+
+app.set("trust proxy", 1);
 
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin || allowedOrigins.some((o) => origin.startsWith(o))) {
             callback(null, true);
         } else {
             callback(new Error("Not allowed by CORS"));
@@ -48,10 +51,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24 * 60 * 60 * 1000
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+        maxAge: 10 * 60 * 1000
     }
 }));
 

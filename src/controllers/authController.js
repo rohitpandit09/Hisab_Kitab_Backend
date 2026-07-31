@@ -3,10 +3,12 @@ const bcrypt = require("bcrypt");
 const { generateAccessToken, generateRefreshToken } = require('../utils/generateTokens');
 const jwt = require('jsonwebtoken');
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000
 };
 
@@ -146,14 +148,15 @@ exports.googleLogin = async (req, res) => {
     try {
         const user = req.user;
 
+        const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/+$/, "");
+
         if (!user) {
-            return res.redirect(`https://rohitpandit09.github.io?error=auth_failed`);
+            return res.redirect(`${clientUrl}/?error=auth_failed`);
         }
 
         const jwtRefreshToken = generateRefreshToken(user);
         const jwtAccessToken = generateAccessToken(user);
 
-        // Salt round 10 for fast non-blocking operation
         const hashedJWTRefreshToken = await bcrypt.hash(jwtRefreshToken, 10);
 
         user.refreshToken = hashedJWTRefreshToken;
@@ -163,7 +166,7 @@ exports.googleLogin = async (req, res) => {
         res.cookie('jwtRefreshToken', jwtRefreshToken, cookieOptions);
         res.cookie('jwtAccessToken', jwtAccessToken, { ...cookieOptions, maxAge: 30 * 60 * 1000 });
 
-        res.redirect(`${process.env.CLIENT_URL}dashboard`);
+        return res.redirect(`${clientUrl}/dashboard`);
     } catch (err) {
         return res.status(500).json({
             success: false,
