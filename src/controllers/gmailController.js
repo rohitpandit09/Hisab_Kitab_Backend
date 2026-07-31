@@ -83,7 +83,7 @@ exports.getEmail = async (req, res) => {
 
         let listData;
         try {
-            listData = await callGmailAPI(user, "/users/me/messages", { q: GMAIL_SEARCH_QUERY, maxResults: 30 });
+            listData = await callGmailAPI(user, "/users/me/messages", { q: GMAIL_SEARCH_QUERY, maxResults: 10 });
         } catch (err) {
             
             const stored = await Transaction.find({ userId: user._id }).sort({ transactionDate: -1 }).lean();
