@@ -26,7 +26,7 @@ const authLimiter = ratelimiter({
     legacyHeaders: false
 });
 
-const allowedOrigins = ("https://rohitpandit09.github.io/Hisab-Kitab-Frontend").split(",");
+const allowedOrigins = ("https://rohitpandit09.github.io/Hisab-Kitab-Frontend/").split(",");
 
 app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
