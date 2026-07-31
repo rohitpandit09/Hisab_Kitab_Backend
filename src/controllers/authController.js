@@ -163,7 +163,7 @@ exports.googleLogin = async (req, res) => {
         res.cookie('jwtRefreshToken', jwtRefreshToken, cookieOptions);
         res.cookie('jwtAccessToken', jwtAccessToken, { ...cookieOptions, maxAge: 30 * 60 * 1000 });
 
-        res.redirect(` https://rohitpandit09.github.io/dashboard`);
+        res.redirect(`${proccess.env.CLIENT_URL}dashboard`);
     } catch (err) {
         return res.status(500).json({
             success: false,
