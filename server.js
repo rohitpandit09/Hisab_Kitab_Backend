@@ -4,66 +4,89 @@ const cors = require('cors');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
 const ratelimiter = require('express-rate-limit');
+const helmet = require('helmet');
 const connectDB = require('./src/config/db');
 const passport = require("./src/config/passport");
 const session = require("express-session");
 const dns = require('dns');
 
-dns.setServers(['8.8.8.8','8.8.4.4'])
-
-
-// rate limiter 
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 const limiter = ratelimiter({
-    windowMs : 15*60*1000,
-    max:100,
-})
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false
+});
 
-// passport setup  and session
+const authLimiter = ratelimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false
+});
 
-app.use(session({
-    secret : process.env.JWT_SECRET,
-    resave : false,
-    saveUninitialized : true
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173").split(",");
+
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
-app.use(passport.initialize());
-app.use(passport.session());
-
-
-
-// Datebase calling
-
-connectDB();
-
-// Importing Routes
-
-const authRoutes = require('./src/routes/authRoutes');
-const gmailRoutes = require("./src/routes/gmailRoutes")
-
-
-// Using all installed packages 
 
 app.use(cors({
-    origin:'http://localhost:5173',
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true
 }));
 
-app.use(express.json());
+app.use(session({
+    secret: process.env.JWT_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 24 * 60 * 60 * 1000
+    }
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+connectDB();
+
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(limiter);
 app.use(cookieParser());
 
+const authRoutes = require('./src/routes/authRoutes');
+const gmailRoutes = require("./src/routes/gmailRoutes");
+const budgetRoutes = require("./src/routes/budgetRoutes");
+const reportRoutes = require("./src/routes/reportRoutes");
+const notificationRoutes = require("./src/routes/notificationRoutes");
+const categoryRoutes = require("./src/routes/categoryRoutes");
 
+app.use('/api/auth', authLimiter, authRoutes);
+app.use("/api/gmail", gmailRoutes);
+app.use("/api/budget", budgetRoutes);
+app.use("/api/reports", reportRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/categories", categoryRoutes);
 
-// Using app.use
+app.use((err, req, res, next) => {
+    if (err.message === "Not allowed by CORS") {
+        return res.status(403).json({ success: false, message: "Origin not allowed" });
+    }
+    return res.status(500).json({ success: false, message: err.message || "Internal Server Error" });
+});
 
-app.use('/api/auth',authRoutes);
-app.use("/api/gmail",gmailRoutes);
-
-
-// Running the server
-
-app.listen(5000,()=>{
-    console.log("Server started on PORT 5000");
-})
-
-
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server started on PORT ${PORT}`);
+});
