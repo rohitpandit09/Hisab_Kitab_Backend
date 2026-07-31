@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
     },
     mobile: {
         type: String,
-        default: null
+        
     },
     occupation: {
         type: String,
