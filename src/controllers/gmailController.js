@@ -175,7 +175,7 @@ exports.getEmail = async (req, res) => {
                 max_tokens: 2000,
             });
 
-            console.log(response)
+            console.log(groqRes);
 
             let raw = groqRes.choices[0]?.message?.content || "[]";
             raw = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
