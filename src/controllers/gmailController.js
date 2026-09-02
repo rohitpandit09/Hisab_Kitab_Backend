@@ -175,6 +175,8 @@ exports.getEmail = async (req, res) => {
                 max_tokens: 2000,
             });
 
+            console.log(response)
+
             let raw = groqRes.choices[0]?.message?.content || "[]";
             raw = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
             const match = raw.match(/\[[\s\S]*\]/);
@@ -182,7 +184,7 @@ exports.getEmail = async (req, res) => {
             const parsed = JSON.parse(raw);
             parsedTransactions = Array.isArray(parsed) ? parsed : [];
         } catch (err) {
-            
+
             console.error("Groq parse error:", err.message);
             parsedTransactions = [];
         }
