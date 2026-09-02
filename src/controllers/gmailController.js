@@ -172,7 +172,7 @@ exports.getEmail = async (req, res) => {
                 messages: [{ role: "user", content: prompt }],
                 model: "openai/gpt-oss-20b",
                 temperature: 0,
-                max_tokens: 2048,
+                max_tokens: 2000,
             });
 
             let raw = groqRes.choices[0]?.message?.content || "[]";
