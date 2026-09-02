@@ -170,7 +170,7 @@ exports.getEmail = async (req, res) => {
         try {
             const groqRes = await groq.chat.completions.create({
                 messages: [{ role: "user", content: prompt }],
-                model: "openai/gpt-oss-20b",
+                model: "llama-3.3-70b-versatile",
                 temperature: 0,
                 max_tokens: 2000,
             });
